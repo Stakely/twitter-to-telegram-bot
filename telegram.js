@@ -18,9 +18,8 @@ setInterval(async () => {
   console.log('> Checking subscriptions...')
   const subscriptions = db.prepare('SELECT * FROM subscriptions').all()
   for (const subscription of subscriptions) {
-    // Get tweets
+    // Get tweets by account since the last check
     const tweets = await twitter.getTweets(subscription.twitter_account, subscription.last_check)
-    console.log(tweets)
     for (const tweet of tweets) {
       const text = '<b>' + subscription.twitter_account + ' says</b>\n\n' + tweet.text + '\n\n<a href="https://twitter.com/' + subscription.twitter_account + '/status/' + tweet.id + '">TWEET URL</a>'
       // If the tweet does contain a link, show preview. Else, do not show it since it will load the message text from the tweet url
@@ -61,7 +60,7 @@ bot.onText(/\/subscriptions/, async (msg) => {
   // Only admins can use this function
   if (!userIsAdmin(userId)) return
 
-  const searchSubscriptions = db.prepare('SELECT * FROM subscriptions WHERE telegram_chat = ?').all(chatId)
+  const searchSubscriptions = db.prepare('SELECT twitter_account FROM subscriptions WHERE telegram_chat = ?').all(chatId)
   bot.sendMessage(chatId, JSON.stringify(searchSubscriptions, null, 2))
 })
 
