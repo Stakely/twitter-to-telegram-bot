@@ -10,6 +10,16 @@ Node 12 or higher with NPM must be installed.
 
 Rename the `env.example` file to `.env` and set the project variables.
 
+Create a `subscriptions.db` SQLite database file with the following schema 
+```
+CREATE TABLE "subscriptions" (
+	"subscription_id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	"twitter_account"	TEXT NOT NULL,
+	"telegram_chat"	NUMERIC NOT NULL,
+	"last_check"	TEXT NOT NULL
+)
+```
+
 
 Install dependencies
 ```

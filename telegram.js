@@ -21,7 +21,7 @@ setInterval(async () => {
     // Get tweets by account since the last check
     const tweets = await twitter.getTweets(subscription.twitter_account, subscription.last_check)
     for (const tweet of tweets) {
-      const text = '<b>' + subscription.twitter_account + ' says</b>\n\n' + tweet.text + '\n\n<a href="https://twitter.com/' + subscription.twitter_account + '/status/' + tweet.id + '">TWEET URL</a>'
+      const text = '<b>' + subscription.twitter_account + ':</b>\n\n' + tweet.text + '\n\n<a href="https://twitter.com/' + subscription.twitter_account + '/status/' + tweet.id + '">TWEET URL</a>'
       // If the tweet does contain a link, show preview. Else, do not show it since it will load the message text from the tweet url
       if (tweet.text.includes('http')) {
         bot.sendMessage(subscription.telegram_chat, text, { parse_mode: 'html' })
