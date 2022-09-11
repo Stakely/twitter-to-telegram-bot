@@ -21,8 +21,19 @@ setInterval(async () => {
     // Get tweets by account since the last check
     const tweets = await twitter.getTweets(subscription.twitter_account, subscription.last_check)
     for (const tweet of tweets) {
-      const text = '<b>' + subscription.twitter_account + ':</b>\n\n' + tweet.text + '\n\n<a href="https://twitter.com/' + subscription.twitter_account + '/status/' + tweet.id + '">TWEET URL</a>'
+      // Do not forward replies
+      if (tweet.in_reply_to_user_id) continue
+      
+      let text = '<b>' + subscription.twitter_account + ':</b>\n\n' + tweet.text + '\n\n<a href="https://twitter.com/' + subscription.twitter_account + '/status/' + tweet.id + '">TWEET URL</a>'
+
+      // Replace Telegram alias to Twitter direct links in order to aviod scams
+      const mentions = text.matchAll(/\@(\w+)/g)
+      for (const mention of mentions) {
+        console.log('MENTION', mention[0])
+        text = text.replace(mention[0], `<a href="https://twitter.com/${mention[1]}">${mention[0]}</a>`)
+      }
       // If the tweet does contain a link, show preview. Else, do not show it since it will load the message text from the tweet url
+      // Note that we are checking tweet.text, not text. This is because we insert mentions in the text that are no useful urls
       if (tweet.text.includes('http')) {
         bot.sendMessage(subscription.telegram_chat, text, { parse_mode: 'html' })
       } else {
@@ -36,7 +47,7 @@ setInterval(async () => {
 
 
 // Admin functions
-bot.onText(/\/subscribe @(\S+)/, async (msg, match) => {
+bot.onText(/\/subscribe @(\w+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from.id
   // Only admins can use this function
@@ -64,7 +75,7 @@ bot.onText(/\/subscriptions/, async (msg) => {
   bot.sendMessage(chatId, JSON.stringify(searchSubscriptions, null, 2))
 })
 
-bot.onText(/\/unsubscribe @(\S+)/, async (msg, match) => {
+bot.onText(/\/unsubscribe @(\w+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from.id
   // Only admins can use this function
